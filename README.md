@@ -1,2 +1,2 @@
-# SharpShooter-Flask
-좌표 전송 관련 플라스크 서버 레포입니다.
+# SharpShooter-Server
+Node.js 서버 레포입니다.
