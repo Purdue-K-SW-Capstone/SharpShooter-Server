@@ -44,3 +44,48 @@ wss.on("connection", (ws, req) => {
     });
   });
 });
+
+//multer 사용코드
+
+const axios = require("axios");
+const https = require("https");
+const multer = require("multer");
+const FormData = require("form-data");
+
+const upload = multer();
+
+router.post(
+  "/upload",
+  upload.single("filepond"), // multer를 이용하여 업로드 파일 처리
+
+  async (req, res, next) => {
+    try {
+      // buffer를 FormData로 감쌈
+      const formData = new FormData();
+      formData.append("filepond", req.file.buffer, {
+        filename: req.file.originalname,
+      });
+
+      // 다른 서버로 전송
+      const result = await axios.post(
+        `http://192.168.2.202:${CLIENT_PORT}`,
+        formData,
+        {
+          headers: {
+            ...formData.getHeaders(),
+            "Content-Length": formData.getLengthSync(),
+            apikey: "apikey",
+            host: "hosts",
+          },
+          httpsAgent: new https.Agent({
+            rejectUnauthorized: false,
+          }),
+        }
+      );
+      res.status(200).json(result.data);
+    } catch (err) {
+      logger.error(err);
+      res.status(500).send(`${err}`);
+    }
+  }
+);
