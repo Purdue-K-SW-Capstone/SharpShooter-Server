@@ -45,47 +45,11 @@ wss.on("connection", (ws, req) => {
   });
 });
 
-//multer 사용코드
-
-const axios = require("axios");
-const https = require("https");
-const multer = require("multer");
-const FormData = require("form-data");
-
-const upload = multer();
-
-router.post(
-  "/upload",
-  upload.single("filepond"), // multer를 이용하여 업로드 파일 처리
-
-  async (req, res, next) => {
-    try {
-      // buffer를 FormData로 감쌈
-      const formData = new FormData();
-      formData.append("filepond", req.file.buffer, {
-        filename: req.file.originalname,
-      });
-
-      // 다른 서버로 전송
-      const result = await axios.post(
-        `http://192.168.2.202:${CLIENT_PORT}`,
-        formData,
-        {
-          headers: {
-            ...formData.getHeaders(),
-            "Content-Length": formData.getLengthSync(),
-            apikey: "apikey",
-            host: "hosts",
-          },
-          httpsAgent: new https.Agent({
-            rejectUnauthorized: false,
-          }),
-        }
-      );
-      res.status(200).json(result.data);
-    } catch (err) {
-      logger.error(err);
-      res.status(500).send(`${err}`);
-    }
-  }
-);
+//이미지 바이너리로 인코딩
+const fs = require('fs');
+let readFile = fs.readFileSync("../pictureTarget.jpg"); //이미지 파일 읽기
+let encode = Buffer.from(readFile).toString('base64'); //파일 인코딩
+let makeEncodeFile = fs.writeFileSync('./encodeFile', encode) //인코딩 파일 만들기
+let readFile2 = fs.readFileSync('./encodeFile', 'base64'); //인코딩된 파일 읽기
+let decode = Buffer.from(encode, 'base64'); //파일 디코딩
+let makeDecodeFile = fs.writeFileSync('./decode.jpg', decode); //디코딩된 파일 만들기
