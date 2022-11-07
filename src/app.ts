@@ -19,15 +19,17 @@ const server = http.createServer(app);
 const port = Number(process.env.HTTP_PORT);
 
 //이미지 바이너리로 인코딩
-const fs = require("fs");
-let readFile = fs.readFileSync("img/pictureTarget.jpg"); //이미지 파일 읽기
-let encode = Buffer.from(readFile).toString("base64"); //파일 인코딩
-
+function jpgTobase64() {
+  const fs = require("fs");
+  let readFile = fs.readFileSync("img/pictureTarget.jpg"); //이미지 파일 읽기
+  let encode = Buffer.from(readFile).toString("base64"); //파일 인코딩
+  return encode;
+}
 function base64ToArrayBuffer(base64: any) {
-  var binary_string = Buffer.from(base64, "base64").toString("binary");
-  var len = binary_string.length;
-  var bytes = new Uint8Array(len);
-  for (var i = 0; i < len; i++) {
+  let binary_string = Buffer.from(base64, "base64").toString("binary");
+  let len = binary_string.length;
+  let bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
     bytes[i] = binary_string.charCodeAt(i);
   }
 
