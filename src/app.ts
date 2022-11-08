@@ -35,7 +35,7 @@ wss.on("connection", (ws, req) => {
   ws.on("message", (data: Buffer) => {
     // extract the json in binary data(raw data)
     const res = JSON.parse(data.toString());
-
+    
     // when get the {start: 1}
     if ("start" in res) {
       wss.clients.forEach((client) => {
