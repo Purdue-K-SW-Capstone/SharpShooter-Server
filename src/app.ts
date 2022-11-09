@@ -37,13 +37,17 @@ wss.on("connection", (ws, req) => {
 
     // when get the {start: 1}
     if ("start" in res) {
+      console.log("start 받음");
+      console.log("wewew");
       wss.on("connection", (ws, req) => {
         wss.clients.forEach((client) => {
           // jpg to byte code for test (temp)
           const img = fs.readFileSync("./img/pictureTarget.jpg");
-          console.log(img);
-          client.send(img);
-          console.log("이미지 전송하였습니다.");
+          setTimeout(() => {
+            client.send(img);
+            console.log("보낸 이미지 데이터" + img);
+            console.log("이미지 전송하였습니다.");
+          }, 10000);
         });
       });
     } else if ("coordinate" in res) {
