@@ -6,7 +6,6 @@ import fs from "fs";
 import { WebSocketServer } from "ws";
 import router from "./index-router";
 
-
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
 const app: Application = express();
@@ -31,31 +30,40 @@ const wss: WebSocketServer = new WebSocketServer({
 // 전송받는 데이터 마다 웹소켓 포트를 다르게 해서 서버를 열까?
 wss.on("connection", (ws, req) => {
   console.log(`WS is opened! at port ${process.env.WS_PORT}`);
-
   ws.on("message", (data: Buffer) => {
     // extract the json in binary data(raw data)
     const res = JSON.parse(data.toString());
-    
+    console.log(res.start);
+
     // when get the {start: 1}
     if ("start" in res) {
-      wss.clients.forEach((client) => {
-        // jpg to byte code for test (temp)
-        const img = fs.readFileSync("./img/pictureTarget.jpg");
-        client.send(img); // send date with type of Blob
+      wss.on("connection", (ws, req) => {
+        wss.clients.forEach((client) => {
+          // jpg to byte code for test (temp)
+          const img = fs.readFileSync("./img/pictureTarget.jpg");
+          console.log(img);
+          client.send(img);
+          console.log("이미지 전송하였습니다.");
+        });
       });
-    } else if ("coordinate" in res) { // {"coordinate": x, "time": x.xx}
-      wss.clients.forEach((client) => {
-        client.send(data);  // send the coordinate(json of string type)
+    } else if ("coordinate" in res) {
+      wss.on("connection", (ws, req) => {
+        // {"coordinate": x, "time": x.xx}
+        wss.clients.forEach((client) => {
+          client.send(data); // send the coordinate(json of string type)
+        });
       });
-    } else if ("image" in res) {  // {"image": Buffer}
-      wss.clients.forEach((client) => {
-        client.send(res?.image);  // send image to client (Blob type)
+    } else if ("image" in res) {
+      wss.on("connection", (ws, req) => {
+        // {"image": Buffer}
+        wss.clients.forEach((client) => {
+          client.send(res?.image); // send image to client (Blob type)
+        });
       });
     }
 
     // This code is for check the Time
     // const time = data.readFloatBE();
     // console.log("time : " + data.readFloatBE());
-
   });
 });
