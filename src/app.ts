@@ -33,43 +33,35 @@ wss.on("connection", (ws, req) => {
   ws.on("message", (data: Buffer) => {
     // extract the json in binary data(raw data)
     const res = JSON.parse(data.toString());
-    console.log(res.start);
+    console.log(res);
 
     // when get the {start: 1}
     if ("start" in res) {
       console.log("start 받음");
-      wss.on("connection", (ws, req) => {
-        wss.clients.forEach((client) => {
-          // jpg to byte code for test (temp)
-          //test Code
-          // const img = fs.readFileSync("./img/pictureTarget.jpg");
-          // setTimeout(() => {
-          //   client.send(img);
-          //   console.log("보낸 이미지 데이터" + img);
-          //   console.log("이미지 전송하였습니다.");
-          // }, 1000);
-          // //real code
-          const msg = {
-            start: 1,
-          };
-          client.send(JSON.stringify(msg));
-        });
+      wss.clients.forEach((client) => {
+        // jpg to byte code for test (temp)
+        //test Code
+        // const img = fs.readFileSync("./img/pictureTarget.jpg");
+        // setTimeout(() => {
+        //   client.send(img);
+        //   console.log("보낸 이미지 데이터" + img);
+        //   console.log("이미지 전송하였습니다.");
+        // }, 1000);
+        // //real code
+        const msg = {
+          start: 1,
+        };
+        client.send(JSON.stringify(msg));
       });
     } else if ("coordinate" in res) {
-      wss.on("connection", (ws, req) => {
-        // {"coordinate": x, "time": x.xx}
-        wss.clients.forEach((client) => {
-          client.send(data); // send the coordinate(json of string type)
-        });
+      // {"coordinate": x, "time": x.xx}
+      wss.clients.forEach((client) => {
+        client.send(data); // send the coordinate(json of string type)
       });
-    } else if ("image" in res) {
-      wss.on("connection", (ws, req) => {
-        // {"image": Buffer}
-        wss.clients.forEach((client) => {
-          console.log("보낸 이미지 데이터" + res?.image);
-          console.log("이미지 전송하였습니다.");
-          client.send(res?.image); // send image to client (Blob type)
-        });
+    } else if ("img" in res) {
+      console.log(res?.img)
+      wss.clients.forEach((client) => {
+        client.send(res?.img); // send image to client (Blob type)
       });
     }
 
