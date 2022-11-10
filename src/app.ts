@@ -54,12 +54,12 @@ wss.on("connection", (ws, req) => {
         client.send(JSON.stringify(msg));
       });
     } else if ("coordinate" in res) {
-      // {"coordinate": x, "time": x.xx}
+      // {"coordinate": [x,y]}
+      console.log(res)
       wss.clients.forEach((client) => {
         client.send(data); // send the coordinate(json of string type)
       });
     } else if ("img" in res) {
-      console.log(res?.img)
       wss.clients.forEach((client) => {
         client.send(res?.img); // send image to client (Blob type)
       });
