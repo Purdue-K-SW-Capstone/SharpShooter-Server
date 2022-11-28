@@ -40,14 +40,6 @@ wss.on("connection", (ws, req) => {
       console.log("start 받음");
       wss.clients.forEach((client) => {
         // jpg to byte code for test (temp)
-        //test Code
-        // const img = fs.readFileSync("./img/pictureTarget.jpg");
-        // setTimeout(() => {
-        //   client.send(img);
-        //   console.log("보낸 이미지 데이터" + img);
-        //   console.log("이미지 전송하였습니다.");
-        // }, 1000);
-        // //real code
         const msg = {
           start: 1,
         };
@@ -55,13 +47,22 @@ wss.on("connection", (ws, req) => {
       });
     } else if ("coordinate" in res) {
       // {"coordinate": [x,y]}
-      console.log(res)
+      console.log("실제 데이터" + res);
+      console.log("타입은? " + typeof res);
       wss.clients.forEach((client) => {
-        client.send(data); // send the coordinate(json of string type)
+        console.log("변형 후 " + JSON.stringify(res));
+        client.send(JSON.stringify(res)); // send the coordinate(json of string type)
       });
     } else if ("img" in res) {
+      //real code
       wss.clients.forEach((client) => {
         client.send(res?.img); // send image to client (Blob type)
+      });
+    } else if ("size" in res) {
+      console.log("fffffffff");
+      console.log(res);
+      wss.clients.forEach((client) => {
+        client.send(res?.size); // send image to client (Blob type)
       });
     }
 
