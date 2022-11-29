@@ -45,9 +45,10 @@ wss.on("connection", (ws, req) => {
         const img = fs.readFileSync("./img/pictureTarget.jpg");
         ws.send(img);
         //image size 전송 코드
-        var d = { size: [500, 500] };
+        var d = { size: [200, 200] };
         ws.send(JSON.stringify(d));
       });
+
       //real code
       // wss.clients.forEach((client) => {
       //   // jpg to byte code for test (temp)
@@ -66,14 +67,15 @@ wss.on("connection", (ws, req) => {
       });
     } else if ("img" in res) {
       //real code
+      console.log("서버에서 이미지 보냄");
       wss.clients.forEach((client) => {
         client.send(res?.img); // send image to client (Blob type)
       });
     } else if ("size" in res) {
-      console.log("fffffffff");
+      console.log("서버에서 사진 사이즈 보냄");
       console.log(res);
       wss.clients.forEach((client) => {
-        client.send(res?.size); // send image to client (Blob type)
+        client.send(JSON.stringify(res)); // send image to client (Blob type)
       });
     }
 
