@@ -38,13 +38,24 @@ wss.on("connection", (ws, req) => {
     // when get the {start: 1}
     if ("start" in res) {
       console.log("start 받음");
-      wss.clients.forEach((client) => {
-        // jpg to byte code for test (temp)
-        const msg = {
-          start: 1,
-        };
-        client.send(JSON.stringify(msg));
+
+      //test code
+      wss.on("connection", (ws, req) => {
+        console.log("이미지를 전송합니다");
+        const img = fs.readFileSync("./img/pictureTarget.jpg");
+        ws.send(img);
+        //image size 전송 코드
+        var d = { size: [500, 500] };
+        ws.send(JSON.stringify(d));
       });
+      //real code
+      // wss.clients.forEach((client) => {
+      //   // jpg to byte code for test (temp)
+      //   const msg = {
+      //     start: 1,
+      //   };
+      //   client.send(JSON.stringify(msg));
+      // });
     } else if ("coordinate" in res) {
       // {"coordinate": [x,y]}
       console.log("실제 데이터" + res);
