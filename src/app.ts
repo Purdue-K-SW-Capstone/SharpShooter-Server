@@ -4,7 +4,10 @@ import path from "path";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import { WebSocketServer } from "ws";
-import router from "./index-router";
+import router from "./index.router";
+
+// TypeORM
+import { AppDataSource } from "./ormconfig";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -21,6 +24,16 @@ const port = Number(process.env.HTTP_PORT);
 server.listen(port, () => {
   console.log(`start! express server on port ${port}`);
 });
+
+//TypeORM
+AppDataSource.initialize()
+  .then(() => {
+    console.log("Data Source has been initialized!");
+  })
+  .catch((err) => {
+    console.log("Error during Data Source initialization : ", err);
+  });
+
 
 // Create new WebSocket Server
 const wss: WebSocketServer = new WebSocketServer({
@@ -40,14 +53,6 @@ wss.on("connection", (ws, req) => {
       console.log("start 받음");
       wss.clients.forEach((client) => {
         // jpg to byte code for test (temp)
-        //test Code
-        // const img = fs.readFileSync("./img/pictureTarget.jpg");
-        // setTimeout(() => {
-        //   client.send(img);
-        //   console.log("보낸 이미지 데이터" + img);
-        //   console.log("이미지 전송하였습니다.");
-        // }, 1000);
-        // //real code
         const msg = {
           start: 1,
         };
@@ -55,16 +60,32 @@ wss.on("connection", (ws, req) => {
       });
     } else if ("coordinate" in res) {
       // {"coordinate": [x,y]}
-      console.log(res)
+      console.log("실제 데이터" + res);
+      console.log("타입은? " + typeof res);
       wss.clients.forEach((client) => {
-        client.send(data); // send the coordinate(json of string type)
+        console.log("변형 후 " + JSON.stringify(res));
+        client.send(JSON.stringify(res)); // send the coordinate(json of string type)
       });
     } else if ("img" in res) {
+      //real code
       wss.clients.forEach((client) => {
         client.send(res?.img); // send image to client (Blob type)
       });
+    } else if ("size" in res) {
+      console.log("서버에서 사진 사이즈 보냄");
+      console.log(res);
+      wss.clients.forEach((client) => {
+        client.send(JSON.stringify(res)); // send target size to client (Blob type)
+      });
+    } else if ("finish" in res) {
+      console.log("새로운 타깃을 받기 위해 메인페이지로 복귀");
+      const msg = {
+        finish: 1,
+      };
+      wss.clients.forEach((client) => {
+        client.send(JSON.stringify(res)); // send target size to client (Blob type)
+      });
     }
-
     // This code is for check the Time
     // const time = data.readFloatBE();
     // console.log("time : " + data.readFloatBE());
