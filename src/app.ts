@@ -34,7 +34,6 @@ AppDataSource.initialize()
     console.log("Error during Data Source initialization : ", err);
   });
 
-
 // Create new WebSocket Server
 const wss: WebSocketServer = new WebSocketServer({
   port: Number(process.env.WS_PORT),
