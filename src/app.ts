@@ -4,7 +4,6 @@ import path from "path";
 import * as dotenv from "dotenv";
 import fs from "fs";
 import { WebSocketServer } from "ws";
-import router from "./index-router";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -13,7 +12,6 @@ const app: Application = express();
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(router);
 
 const server = http.createServer(app);
 const port = Number(process.env.HTTP_PORT);
@@ -33,35 +31,77 @@ wss.on("connection", (ws, req) => {
   ws.on("message", (data: Buffer) => {
     // extract the json in binary data(raw data)
     const res = JSON.parse(data.toString());
-    console.log(res.start);
+    console.log(res);
 
     // when get the {start: 1}
     if ("start" in res) {
+      console.log("start 받음");
+
+      //test code
       wss.on("connection", (ws, req) => {
-        wss.clients.forEach((client) => {
-          // jpg to byte code for test (temp)
-          const img = fs.readFileSync("./img/pictureTarget.jpg");
-          console.log(img);
-          client.send(img);
-          console.log("이미지 전송하였습니다.");
-        });
+        console.log("이미지를 전송합니다");
+        const img = fs.readFileSync("./img/remove_first.jpg");
+        ws.send(img);
+        //image size 전송 코드
+        // var imgdata = { size: [221, 169] };
+        var imgdata = { size: [246, 180] };
+        ws.send(JSON.stringify(imgdata));
+        //coordinate 전송 코드
+        var coordata = { coordinate: [149, 17] };
+        var coordata11 = { coordinate: [27, 59] };
+        var coordata2 = { coordinate: [120, 38] };
+        var coordata21 = { coordinate: [25, 101] };
+        var coordata3 = { coordinate: [162, 85] };
+        var coordata31 = { coordinate: [200, 129] };
+        var coordata4 = { coordinate: [123, 110] };
+        var coordata41 = { coordinate: [12, 110] };
+        // setTimeout(() => ws.send(JSON.stringify(coordata)), 1000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata2)), 3000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata3)), 5000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata4)), 7000);
+
+        setTimeout(() => ws.send(JSON.stringify(coordata11)), 1000);
+        setTimeout(() => ws.send(JSON.stringify(coordata21)), 2000);
+        setTimeout(() => ws.send(JSON.stringify(coordata31)), 3000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata41)), 000);
       });
+
+      //real code
+      // wss.clients.forEach((client) => {
+      //   // jpg to byte code for test (temp)
+      //   const msg = {
+      //     start: 1,
+      //   };
+      //   client.send(JSON.stringify(msg));
+      // });
     } else if ("coordinate" in res) {
-      wss.on("connection", (ws, req) => {
-        // {"coordinate": x, "time": x.xx}
-        wss.clients.forEach((client) => {
-          client.send(data); // send the coordinate(json of string type)
-        });
+      // {"coordinate": [x,y]}
+      console.log("실제 데이터" + res);
+      console.log("타입은? " + typeof res);
+      wss.clients.forEach((client) => {
+        console.log("변형 후 " + JSON.stringify(res));
+        client.send(JSON.stringify(res)); // send the coordinate(json of string type)
       });
-    } else if ("image" in res) {
-      wss.on("connection", (ws, req) => {
-        // {"image": Buffer}
-        wss.clients.forEach((client) => {
-          client.send(res?.image); // send image to client (Blob type)
-        });
+    } else if ("img" in res) {
+      //real code
+      wss.clients.forEach((client) => {
+        client.send(res?.img); // send image to client (Blob type)
+      });
+    } else if ("size" in res) {
+      console.log("서버에서 사진 사이즈 보냄");
+      console.log(res);
+      wss.clients.forEach((client) => {
+        client.send(JSON.stringify(res)); // send target size to client (Blob type)
+      });
+    } else if ("finish" in res) {
+      console.log("새로운 타깃을 받기 위해 메인페이지로 복귀");
+      const msg = {
+        finish: 1,
+      };
+      wss.clients.forEach((client) => {
+        client.send(JSON.stringify(res)); // send target size to client (Blob type)
       });
     }
-
     // This code is for check the Time
     // const time = data.readFloatBE();
     // console.log("time : " + data.readFloatBE());
