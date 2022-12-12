@@ -7,7 +7,7 @@ import { WebSocketServer } from "ws";
 import router from "./index.router";
 
 // TypeORM
-import { AppDataSource } from "./ormconfig";
+// import { AppDataSource } from "./ormconfig";
 
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -26,13 +26,13 @@ server.listen(port, () => {
 });
 
 //TypeORM
-AppDataSource.initialize()
-  .then(() => {
-    console.log("Data Source has been initialized!");
-  })
-  .catch((err) => {
-    console.log("Error during Data Source initialization : ", err);
-  });
+// AppDataSource.initialize()
+//   .then(() => {
+//     console.log("Data Source has been initialized!");
+//   })
+//   .catch((err) => {
+//     console.log("Error during Data Source initialization : ", err);
+//   });
 
 // Create new WebSocket Server
 const wss: WebSocketServer = new WebSocketServer({
@@ -50,13 +50,44 @@ wss.on("connection", (ws, req) => {
     // when get the {start: 1}
     if ("start" in res) {
       console.log("start 받음");
-      wss.clients.forEach((client) => {
-        // jpg to byte code for test (temp)
-        const msg = {
-          start: 1,
-        };
-        client.send(JSON.stringify(msg));
+
+      //test code
+      wss.on("connection", (ws, req) => {
+        console.log("이미지를 전송합니다");
+        const img = fs.readFileSync("./img/remove_first.jpg");
+        ws.send(img);
+        //image size 전송 코드
+        // var imgdata = { size: [221, 169] };
+        var imgdata = { size: [246, 180] };
+        ws.send(JSON.stringify(imgdata));
+        //coordinate 전송 코드
+        var coordata = { coordinate: [149, 17] };
+        var coordata11 = { coordinate: [27, 59] };
+        var coordata2 = { coordinate: [120, 38] };
+        var coordata21 = { coordinate: [25, 101] };
+        var coordata3 = { coordinate: [162, 85] };
+        var coordata31 = { coordinate: [200, 129] };
+        var coordata4 = { coordinate: [123, 110] };
+        var coordata41 = { coordinate: [12, 110] };
+        // setTimeout(() => ws.send(JSON.stringify(coordata)), 1000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata2)), 3000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata3)), 5000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata4)), 7000);
+
+        setTimeout(() => ws.send(JSON.stringify(coordata11)), 1000);
+        setTimeout(() => ws.send(JSON.stringify(coordata21)), 2000);
+        setTimeout(() => ws.send(JSON.stringify(coordata31)), 3000);
+        // setTimeout(() => ws.send(JSON.stringify(coordata41)), 000);
       });
+
+      //real code
+      // wss.clients.forEach((client) => {
+      //   // jpg to byte code for test (temp)
+      //   const msg = {
+      //     start: 1,
+      //   };
+      //   client.send(JSON.stringify(msg));
+      // });
     } else if ("coordinate" in res) {
       // {"coordinate": [x,y]}
       console.log("실제 데이터" + res);
