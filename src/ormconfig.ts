@@ -4,8 +4,10 @@ import path from 'path';
 import { Targets } from "./entities/Targets";
 import { Calibers } from "./entities/Calibers";
 
+// set .env for Secret variables
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
+// TypeORM setting for DB
 export const AppDataSource = new DataSource({
     type: "mysql",
     host: process.env.DB_HOST,

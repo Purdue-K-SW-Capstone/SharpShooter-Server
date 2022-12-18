@@ -2,30 +2,34 @@ import express, { Application } from "express";
 import http from "http";
 import path from "path";
 import * as dotenv from "dotenv";
-import fs from "fs";
 import { WebSocketServer } from "ws";
 import router from "./index.router";
 
 // TypeORM
 import { AppDataSource } from "./ormconfig";
 
+// set .env for Secret variables
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
+// load application using express
 const app: Application = express();
 
+// add several function to application like body parser, router
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(router);
 
+// create server
 const server = http.createServer(app);
 const port = Number(process.env.HTTP_PORT);
 
+// start server
 server.listen(port, () => {
   console.log(`start! express server on port ${port}`);
 });
 
-//TypeORM
+//TypeORM initialize
 AppDataSource.initialize()
   .then(() => {
     console.log("Data Source has been initialized!");
@@ -39,9 +43,11 @@ const wss: WebSocketServer = new WebSocketServer({
   port: Number(process.env.WS_PORT),
 });
 
-// 전송받는 데이터 마다 웹소켓 포트를 다르게 해서 서버를 열까?
+// websocket function setting
 wss.on("connection", (ws, req) => {
   console.log(`WS is opened! at port ${process.env.WS_PORT}`);
+
+  // if websocket server get a message from pi2
   ws.on("message", (data: Buffer) => {
     // extract the json in binary data(raw data)
     const res = JSON.parse(data.toString());
@@ -49,7 +55,7 @@ wss.on("connection", (ws, req) => {
 
     // when get the {start: 1}
     if ("start" in res) {
-      console.log("start 받음");
+      console.log("get start");
       wss.clients.forEach((client) => {
         // jpg to byte code for test (temp)
         const msg = {
@@ -57,27 +63,21 @@ wss.on("connection", (ws, req) => {
         };
         client.send(JSON.stringify(msg));
       });
-    } else if ("coordinate" in res) {
+    } else if ("coordinate" in res) { // if get coordinate from pi2
       // {"coordinate": [x,y]}
-      console.log("실제 데이터" + res);
-      console.log("타입은? " + typeof res);
-      wss.clients.forEach((client) => {
-        console.log("변형 후 " + JSON.stringify(res));
+      wss.clients.forEach((client) => { // send coordinates to connected clinets
         client.send(JSON.stringify(res)); // send the coordinate(json of string type)
       });
-    } else if ("img" in res) {
-      //real code
+    } else if ("img" in res) {  // if get image from pi2
       wss.clients.forEach((client) => {
         client.send(res?.img); // send image to client (Blob type)
       });
-    } else if ("size" in res) {
-      console.log("서버에서 사진 사이즈 보냄");
+    } else if ("size" in res) { // if get image size from pi2
       console.log(res);
       wss.clients.forEach((client) => {
         client.send(JSON.stringify(res)); // send target size to client (Blob type)
       });
-    } else if ("finish" in res) {
-      console.log("새로운 타깃을 받기 위해 메인페이지로 복귀");
+    } else if ("finish" in res) { // if get finish
       const msg = {
         finish: 1,
       };
@@ -85,8 +85,5 @@ wss.on("connection", (ws, req) => {
         client.send(JSON.stringify(res)); // send target size to client (Blob type)
       });
     }
-    // This code is for check the Time
-    // const time = data.readFloatBE();
-    // console.log("time : " + data.readFloatBE());
   });
 });

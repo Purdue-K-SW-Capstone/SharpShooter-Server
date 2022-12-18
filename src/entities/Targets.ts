@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Calibers } from "./Calibers";
 
-
+// This code is for defining DB table
 @Entity("TARGETS", { schema: "sharpshooter" })
 export class Targets {
     @PrimaryGeneratedColumn({ type: "int", name: "ID" })
