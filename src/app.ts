@@ -5,9 +5,6 @@ import * as dotenv from "dotenv";
 import { WebSocketServer } from "ws";
 import router from "./index.router";
 
-// TypeORM
-import { AppDataSource } from "./ormconfig";
-
 // set .env for Secret variables
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
@@ -28,15 +25,6 @@ const port = Number(process.env.HTTP_PORT);
 server.listen(port, () => {
   console.log(`start! express server on port ${port}`);
 });
-
-//TypeORM initialize
-AppDataSource.initialize()
-  .then(() => {
-    console.log("Data Source has been initialized!");
-  })
-  .catch((err) => {
-    console.log("Error during Data Source initialization : ", err);
-  });
 
 // Create new WebSocket Server
 const wss: WebSocketServer = new WebSocketServer({
